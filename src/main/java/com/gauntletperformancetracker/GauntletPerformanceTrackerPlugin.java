@@ -54,6 +54,9 @@ public class GauntletPerformanceTrackerPlugin extends Plugin
 	// Region ids
 	private static final int REGION_ID_GAUNTLET_LOBBY = 12127;
 
+	// Ground object ids
+	private static final int DAMAGE_TILE_ID = 36048;
+
 	// Entity ids
 	private static final List<Integer> HUNLLEF_IDS = List.of(
 			NpcID.CRYSTALLINE_HUNLLEF,
@@ -97,6 +100,7 @@ public class GauntletPerformanceTrackerPlugin extends Plugin
 	public int receivedDamage = 0;
 	public int givenDamage = 0;
 	public int tornadoHits = 0;
+	public int floorTileHits = 0;
 	public TickLossState tickLossState;
 
 	private int previousAttackTick;
@@ -167,6 +171,7 @@ public class GauntletPerformanceTrackerPlugin extends Plugin
 		receivedDamage = 0;
 		givenDamage = 0;
 		tornadoHits = 0;
+		floorTileHits = 0;
 		tickLossState = TickLossState.NONE;
 
 		isHunllefMaging = false;
@@ -206,6 +211,16 @@ public class GauntletPerformanceTrackerPlugin extends Plugin
 			{
 				tornadoHits++;
 			}
+		}
+
+		var scene = client.getWorldView(client.getLocalPlayer().getLocalLocation().getWorldView()).getScene();
+		var tiles = scene.getTiles();
+		int tileX = playerLocation.getX() - scene.getBaseX();
+		int tileY = playerLocation.getY() - scene.getBaseY();
+		var currentTile = tiles[playerLocation.getPlane()][tileX][tileY];
+		if (currentTile != null && currentTile.getGroundObject() != null && currentTile.getGroundObject().getId() == DAMAGE_TILE_ID)
+		{
+			floorTileHits++;
 		}
 	}
 

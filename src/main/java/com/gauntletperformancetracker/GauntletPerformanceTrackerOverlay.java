@@ -108,6 +108,11 @@ public class GauntletPerformanceTrackerOverlay extends OverlayPanel
                     .build());
 
             panelComponent.getChildren().add(LineComponent.builder()
+                    .left("Floor tile hits")
+                    .right(Integer.toString(plugin.floorTileHits))
+                    .build());
+
+            panelComponent.getChildren().add(LineComponent.builder()
                     .left("Damage taken")
                     .right(Integer.toString(plugin.receivedDamage))
                     .build());
