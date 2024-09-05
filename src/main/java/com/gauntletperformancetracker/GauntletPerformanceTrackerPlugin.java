@@ -31,7 +31,7 @@ public class GauntletPerformanceTrackerPlugin extends Plugin
 	// Animation Ids
 	private static  final int playerMageAttackId = 1167;
 	private static  final int playerRangeAttackId = 426;
-	private static  final int playerMeleeAttackId = 428;
+	private static  final int playerMeleeAttackId = 440;
 	private static  final int playerKickAttackId = 423;
 	private static  final int playerPunchAttackId = 422;
 	private static  final int[] playerAttackAnimationIds = {playerMageAttackId, playerMeleeAttackId, playerRangeAttackId, playerKickAttackId, playerPunchAttackId};
