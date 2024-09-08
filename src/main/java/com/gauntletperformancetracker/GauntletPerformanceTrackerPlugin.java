@@ -4,7 +4,6 @@ import com.google.inject.Provides;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
-import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.*;
 import net.runelite.client.callback.ClientThread;
@@ -32,9 +31,20 @@ public class GauntletPerformanceTrackerPlugin extends Plugin
 	private static  final int playerMageAttackId = 1167;
 	private static  final int playerRangeAttackId = 426;
 	private static  final int playerMeleeAttackId = 428;
+	private static  final int playerMeleeAltAttackId = 440;
+	private static  final int playerSceptreAttackId = 401;
 	private static  final int playerKickAttackId = 423;
 	private static  final int playerPunchAttackId = 422;
-	private static  final int[] playerAttackAnimationIds = {playerMageAttackId, playerMeleeAttackId, playerRangeAttackId, playerKickAttackId, playerPunchAttackId};
+	private static final int[] playerAttackAnimationIds =
+		{
+			playerMageAttackId,
+			playerMeleeAttackId,
+			playerRangeAttackId,
+			playerKickAttackId,
+			playerPunchAttackId,
+			playerMeleeAltAttackId,
+			playerSceptreAttackId
+		};
 
 	private static  final int bossAttackAnimationId = 8419;
 	private static  final int bossStompAnimationId = 8420;
@@ -48,6 +58,7 @@ public class GauntletPerformanceTrackerPlugin extends Plugin
 
 	// Timings
 	private static  final int weaponAttackSpeed = 4;
+	private static  final int sceptreAttackSpeed = 5;
 	private static  final int normalFoodDelay = 3;
 	private static  final int fastFoodDelay = 2;
 
@@ -104,6 +115,7 @@ public class GauntletPerformanceTrackerPlugin extends Plugin
 	public TickLossState tickLossState;
 
 	private int previousAttackTick;
+	private int currentWeaponAttackSpeed;
 	private NPC hunllef;
 	private final List<NPC> tornadoes = new ArrayList<>();
 	private boolean isHunllefMaging = false;
@@ -176,6 +188,7 @@ public class GauntletPerformanceTrackerPlugin extends Plugin
 
 		isHunllefMaging = false;
 		previousAttackTick = client.getTickCount(); // This gives 4 ticks leeway at the start of the fight
+		currentWeaponAttackSpeed = weaponAttackSpeed;
 	}
 
 	@Subscribe
@@ -190,11 +203,11 @@ public class GauntletPerformanceTrackerPlugin extends Plugin
 
 		int currentTickCount = client.getTickCount();
 		int tickDifference = currentTickCount - previousAttackTick;
-		if (tickDifference >= weaponAttackSpeed + normalFoodDelay)
+		if (tickDifference >= currentWeaponAttackSpeed + normalFoodDelay)
 		{
 			tickLossState = TickLossState.LOSING;
 		}
-		else if (tickDifference >= weaponAttackSpeed)
+		else if (tickDifference >= currentWeaponAttackSpeed)
 		{
 			// Means we are potentially losing ticks unless we eat
 			tickLossState = TickLossState.POTENTIAL;
@@ -256,11 +269,13 @@ public class GauntletPerformanceTrackerPlugin extends Plugin
 				int currentAttackTick = client.getTickCount();
 				int ticksBetweenAttacks = currentAttackTick - previousAttackTick; // Also takes eating into account
 
-				int lostTicks = ticksBetweenAttacks - weaponAttackSpeed;
+				int lostTicks = ticksBetweenAttacks - currentWeaponAttackSpeed;
 				if (lostTicks > 0)
 				{
 					missedTicksCounter += lostTicks;
 				}
+
+				currentWeaponAttackSpeed = animationId == playerSceptreAttackId ? sceptreAttackSpeed : weaponAttackSpeed;
 
 				previousAttackTick = currentAttackTick;
 			}
@@ -414,11 +429,13 @@ public class GauntletPerformanceTrackerPlugin extends Plugin
 
 	private boolean hasCorrectOffsenivePrayerActive(int animationId)
 	{
-		boolean isNoWeaponAttack = animationId == playerKickAttackId || animationId == playerPunchAttackId;
+		boolean isNoWeaponAttack = animationId == playerKickAttackId ||
+			animationId == playerPunchAttackId ||
+			animationId == playerSceptreAttackId;
 		if (!config.countNoWeaponOffPrayer() && isNoWeaponAttack)
 			return true;
 
-		if (animationId == playerMeleeAttackId || isNoWeaponAttack)
+		if (animationId == playerMeleeAttackId || animationId == playerMeleeAltAttackId|| isNoWeaponAttack)
 		{
 			return client.isPrayerActive(Prayer.PIETY) ||
 					client.isPrayerActive(Prayer.ULTIMATE_STRENGTH) ||
@@ -454,7 +471,9 @@ public class GauntletPerformanceTrackerPlugin extends Plugin
 			case NpcID.CRYSTALLINE_HUNLLEF:
 				return animationId != playerMeleeAttackId &&
 						animationId != playerKickAttackId &&
-						animationId != playerPunchAttackId;
+						animationId != playerPunchAttackId &&
+						animationId != playerMeleeAltAttackId &&
+						animationId != playerSceptreAttackId;
 			// Protect from Missiles
 			case NpcID.CRYSTALLINE_HUNLLEF_9022:
 			case NpcID.CORRUPTED_HUNLLEF_9036:
