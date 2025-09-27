@@ -27,7 +27,7 @@ public class GauntletPerformanceTrackerOverlay extends OverlayPanel
     {
         if ((!plugin.isInGauntletLobby && !plugin.isBossActive) ||
             (plugin.isBossActive && config.hideOverlayDuringFight()) ||
-            plugin.totalTicksCounter <= 0)
+            plugin.performanceStatistics.totalTicksCounter <= 0)
             return null;
 
         if (plugin.isBossActive)
@@ -59,72 +59,72 @@ public class GauntletPerformanceTrackerOverlay extends OverlayPanel
         {
             panelComponent.getChildren().add(LineComponent.builder()
                     .left("Total ticks")
-                    .right(Integer.toString(plugin.totalTicksCounter))
+                    .right(Integer.toString(plugin.performanceStatistics.totalTicksCounter))
                     .build());
 
             panelComponent.getChildren().add(LineComponent.builder()
                     .left("Lost ticks")
-                    .right(Integer.toString(plugin.missedTicksCounter))
+                    .right(Integer.toString(plugin.performanceStatistics.missedTicksCounter))
                     .build());
 
             panelComponent.getChildren().add(LineComponent.builder()
                     .left("Used ticks")
-                    .right(String.format("%.2f", (1f - (float)plugin.missedTicksCounter / plugin.totalTicksCounter) * 100f) + "%")
+                    .right(String.format("%.2f", (1f - (float) plugin.performanceStatistics.missedTicksCounter / plugin.performanceStatistics.totalTicksCounter) * 100f) + "%")
                     .build());
 
             panelComponent.getChildren().add(LineComponent.builder()
                     .left("Player attacks")
-                    .right(Integer.toString(plugin.playerAttackCount))
+                    .right(Integer.toString(plugin.performanceStatistics.playerAttackCount))
                     .build());
 
             panelComponent.getChildren().add(LineComponent.builder()
                     .left("Wrong off pray")
-                    .right(Integer.toString(plugin.wrongOffensivePrayerCount))
+                    .right(Integer.toString(plugin.performanceStatistics.wrongOffensivePrayerCount))
                     .build());
 
             panelComponent.getChildren().add(LineComponent.builder()
                     .left("Wrong att style")
-                    .right(Integer.toString(plugin.wrongAttackStyleCount))
+                    .right(Integer.toString(plugin.performanceStatistics.wrongAttackStyleCount))
                     .build());
 
             panelComponent.getChildren().add(LineComponent.builder()
                     .left("Hunllef attacks")
-                    .right(Integer.toString(plugin.hunllefAttackCount))
+                    .right(Integer.toString(plugin.performanceStatistics.hunllefAttackCount))
                     .build());
 
             panelComponent.getChildren().add(LineComponent.builder()
                     .left("Wrong def pray")
-                    .right(Integer.toString(plugin.wrongDefensivePrayerCount))
+                    .right(Integer.toString(plugin.performanceStatistics.wrongDefensivePrayerCount))
                     .build());
 
             panelComponent.getChildren().add(LineComponent.builder()
                     .left("Hunllef stomps")
-                    .right(Integer.toString(plugin.hunllefStompAttackCount))
+                    .right(Integer.toString(plugin.performanceStatistics.hunllefStompAttackCount))
                     .build());
 
             panelComponent.getChildren().add(LineComponent.builder()
                     .left("Tornado hits")
-                    .right(Integer.toString(plugin.tornadoHits))
+                    .right(Integer.toString(plugin.performanceStatistics.tornadoHits))
                     .build());
 
             panelComponent.getChildren().add(LineComponent.builder()
                     .left("Floor tile hits")
-                    .right(Integer.toString(plugin.floorTileHits))
+                    .right(Integer.toString(plugin.performanceStatistics.floorTileHits))
                     .build());
 
             panelComponent.getChildren().add(LineComponent.builder()
                     .left("Damage taken")
-                    .right(Integer.toString(plugin.receivedDamage))
+                    .right(Integer.toString(plugin.performanceStatistics.receivedDamage))
                     .build());
 
             panelComponent.getChildren().add(LineComponent.builder()
                     .left("DPS taken")
-                    .right(String.format("%.3f", plugin.getDps(plugin.receivedDamage)))
+                    .right(String.format("%.3f", plugin.getDps(plugin.performanceStatistics.receivedDamage)))
                     .build());
 
             panelComponent.getChildren().add(LineComponent.builder()
                     .left("DPS given")
-                    .right(String.format("%.3f", plugin.getDps(plugin.givenDamage)))
+                    .right(String.format("%.3f", plugin.getDps(plugin.performanceStatistics.givenDamage)))
                     .build());
         }
 

@@ -28,4 +28,14 @@ public interface GauntletPerformanceTrackerConfig extends Config
     {
         return false;
     }
+    @ConfigItem(
+            keyName = "saveResultsToFile",
+            name = "Save results to a file",
+            description = "Save each run to a timestamped file",
+            position = 2
+    )
+    default boolean saveResultsToFile()
+    {
+        return false;
+    }
 }

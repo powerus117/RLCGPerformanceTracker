@@ -80,6 +80,8 @@ public class GauntletPerformanceTrackerPlugin extends Plugin
 			NpcID.CORRUPTED_HUNLLEF_9038);
 	private static final List<Integer> TORNADO_IDS = List.of(NullNpcID.NULL_9025, NullNpcID.NULL_9039);
 
+	public final PerformanceStatistics performanceStatistics = new PerformanceStatistics();
+
 	private final Pattern eatPattern = Pattern.compile("^eat");
 
 	@Inject
@@ -87,6 +89,9 @@ public class GauntletPerformanceTrackerPlugin extends Plugin
 
 	@Inject
 	private GauntletPerformanceTrackerConfig config;
+
+	@Inject
+	private GauntletPerformanceTrackerWriter writer;
 
 	@Inject
 	private ClientThread clientThread;
@@ -100,20 +105,7 @@ public class GauntletPerformanceTrackerPlugin extends Plugin
 	public boolean isBossActive = false;
 	public boolean isInGauntletLobby = false;
 	public boolean isInGauntlet = false; // Doesn't include lobby
-	public int missedTicksCounter = 0;
-	public int totalTicksCounter = 0;
-	public int playerAttackCount = 0;
-	public int wrongAttackStyleCount = 0;
-	public int wrongOffensivePrayerCount = 0;
-	public int wrongDefensivePrayerCount = 0;
-	public int hunllefAttackCount = 0;
-	public int hunllefStompAttackCount = 0;
-	public int receivedDamage = 0;
-	public int givenDamage = 0;
-	public int tornadoHits = 0;
-	public int floorTileHits = 0;
 	public TickLossState tickLossState;
-
 	private int previousAttackTick;
 	private int currentWeaponAttackSpeed;
 	private NPC hunllef;
@@ -135,7 +127,7 @@ public class GauntletPerformanceTrackerPlugin extends Plugin
 
 	public float getDps(int totalDamage)
 	{
-		return totalDamage / (totalTicksCounter * 0.6f);
+		return totalDamage / (performanceStatistics.totalTicksCounter * 0.6f);
 	}
 
 	@Subscribe
@@ -155,6 +147,7 @@ public class GauntletPerformanceTrackerPlugin extends Plugin
 				isBossActive = false;
 				tornadoes.clear();
 				hunllef = null;
+				writer.writePerformanceToFile(performanceStatistics);
 			}
 		}
 		else if (varbit == GauntletMazeVarBit)
@@ -172,18 +165,18 @@ public class GauntletPerformanceTrackerPlugin extends Plugin
 
 	private void ResetEncounterData()
 	{
-		missedTicksCounter = 0;
-		totalTicksCounter = 0;
-		playerAttackCount = 0;
-		wrongAttackStyleCount = 0;
-		wrongOffensivePrayerCount = 0;
-		wrongDefensivePrayerCount = 0;
-		hunllefAttackCount = 0;
-		hunllefStompAttackCount = 0;
-		receivedDamage = 0;
-		givenDamage = 0;
-		tornadoHits = 0;
-		floorTileHits = 0;
+		performanceStatistics.missedTicksCounter = 0;
+		performanceStatistics.totalTicksCounter = 0;
+		performanceStatistics.playerAttackCount = 0;
+		performanceStatistics.wrongAttackStyleCount = 0;
+		performanceStatistics.wrongOffensivePrayerCount = 0;
+		performanceStatistics.wrongDefensivePrayerCount = 0;
+		performanceStatistics.hunllefAttackCount = 0;
+		performanceStatistics.hunllefStompAttackCount = 0;
+		performanceStatistics.receivedDamage = 0;
+		performanceStatistics.givenDamage = 0;
+		performanceStatistics.tornadoHits = 0;
+		performanceStatistics.floorTileHits = 0;
 		tickLossState = TickLossState.NONE;
 
 		isHunllefMaging = false;
@@ -199,7 +192,7 @@ public class GauntletPerformanceTrackerPlugin extends Plugin
 		if (!isBossActive)
 			return;
 
-		totalTicksCounter++;
+		performanceStatistics.totalTicksCounter++;
 
 		int currentTickCount = client.getTickCount();
 		int tickDifference = currentTickCount - previousAttackTick;
@@ -222,7 +215,7 @@ public class GauntletPerformanceTrackerPlugin extends Plugin
 		{
 			if (playerLocation.equals(tornado.getWorldLocation()))
 			{
-				tornadoHits++;
+				performanceStatistics.tornadoHits++;
 			}
 		}
 
@@ -233,7 +226,7 @@ public class GauntletPerformanceTrackerPlugin extends Plugin
 		var currentTile = tiles[playerLocation.getPlane()][tileX][tileY];
 		if (currentTile != null && currentTile.getGroundObject() != null && currentTile.getGroundObject().getId() == DAMAGE_TILE_ID)
 		{
-			floorTileHits++;
+			performanceStatistics.floorTileHits++;
 		}
 	}
 
@@ -254,16 +247,16 @@ public class GauntletPerformanceTrackerPlugin extends Plugin
 			if (Arrays.stream(playerAttackAnimationIds).anyMatch(value -> value == animationId))
 			{
 				// Player attack
-				playerAttackCount++;
+				performanceStatistics.playerAttackCount++;
 
 				if (!hasCorrectAttackStyle(animationId))
 				{
-					wrongAttackStyleCount++;
+					performanceStatistics.wrongAttackStyleCount++;
 				}
 
 				if (!hasCorrectOffsenivePrayerActive(animationId))
 				{
-					wrongOffensivePrayerCount++;
+					performanceStatistics.wrongOffensivePrayerCount++;
 				}
 
 				int currentAttackTick = client.getTickCount();
@@ -272,7 +265,7 @@ public class GauntletPerformanceTrackerPlugin extends Plugin
 				int lostTicks = ticksBetweenAttacks - currentWeaponAttackSpeed;
 				if (lostTicks > 0)
 				{
-					missedTicksCounter += lostTicks;
+					performanceStatistics.missedTicksCounter = performanceStatistics.missedTicksCounter + lostTicks;
 				}
 
 				currentWeaponAttackSpeed = animationId == playerSceptreAttackId ? sceptreAttackSpeed : weaponAttackSpeed;
@@ -286,16 +279,16 @@ public class GauntletPerformanceTrackerPlugin extends Plugin
 			// Hunllef animation changed
 			if (animationId == bossAttackAnimationId)
 			{
-				hunllefAttackCount++;
+				performanceStatistics.hunllefAttackCount++;
 
 				if (!hasCorrectDefensivePrayerActive())
 				{
-					wrongDefensivePrayerCount++;
+					performanceStatistics.wrongDefensivePrayerCount++;
 				}
 			}
 			else if (animationId == bossStompAnimationId)
 			{
-				hunllefStompAttackCount++;
+				performanceStatistics.hunllefStompAttackCount++;
 			}
 			else if (animationId == bossSwitchToMageAnimationId)
 			{
@@ -395,12 +388,12 @@ public class GauntletPerformanceTrackerPlugin extends Plugin
 		if (event.getActor().getName().equals(client.getLocalPlayer().getName()))
 		{
 			// Local player got hit
-			receivedDamage += damageAmount;
+			performanceStatistics.receivedDamage = performanceStatistics.receivedDamage + damageAmount;
 		}
 		else if (event.getActor().getName().equals("Corrupted Hunllef") ||
 				event.getActor().getName().equals("Crystalline Hunllef"))
 		{
-			givenDamage += damageAmount;
+			performanceStatistics.givenDamage = performanceStatistics.givenDamage + damageAmount;
 		}
 	}
 
