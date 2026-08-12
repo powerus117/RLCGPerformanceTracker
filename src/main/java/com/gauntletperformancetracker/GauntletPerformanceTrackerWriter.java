@@ -33,13 +33,13 @@ public class GauntletPerformanceTrackerWriter {
     private static final String FILE_PREFIX = "gauntletTracker";
 
     private String getDataFilePath(String fileName) {
-        username = client.getLocalPlayer().getName();
         File directory = new File(DATA_DIR + File.separator + username);
         directory.mkdirs();
         return directory + File.separator + fileName;
     }
 
     public String getTrackerFilePath() {
+        username = client.getLocalPlayer().getName();
         Date currentDate = new Date();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm");
         String formattedDate = dateFormat.format(currentDate);
