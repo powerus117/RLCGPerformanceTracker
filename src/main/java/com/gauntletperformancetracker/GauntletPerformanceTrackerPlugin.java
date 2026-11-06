@@ -441,7 +441,7 @@ public class GauntletPerformanceTrackerPlugin extends Plugin
 		if (animationId == playerMageAttackId)
 		{
 			return client.isPrayerActive(Prayer.AUGURY) ||
-					client.isPrayerActive(Prayer.MYSTIC_VIGOR) ||
+					client.isPrayerActive(Prayer.MYSTIC_VIGOUR) ||
 					client.isPrayerActive(Prayer.MYSTIC_MIGHT) ||
 					client.isPrayerActive(Prayer.MYSTIC_LORE) ||
 					client.isPrayerActive(Prayer.MYSTIC_WILL);
