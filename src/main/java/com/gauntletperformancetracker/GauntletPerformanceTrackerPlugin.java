@@ -430,7 +430,9 @@ public class GauntletPerformanceTrackerPlugin extends Plugin
 
 		if (animationId == playerMeleeAttackId || animationId == playerMeleeAltAttackId|| isNoWeaponAttack)
 		{
-			return client.isPrayerActive(Prayer.PIETY) ||
+			return client.isPrayerActive(Prayer.ZEAL) ||
+					client.isPrayerActive(Prayer.PIETY) ||
+					client.isPrayerActive(Prayer.CHIVALRY) ||
 					client.isPrayerActive(Prayer.ULTIMATE_STRENGTH) ||
 					client.isPrayerActive(Prayer.SUPERHUMAN_STRENGTH) ||
 					client.isPrayerActive(Prayer.BURST_OF_STRENGTH);
@@ -439,6 +441,7 @@ public class GauntletPerformanceTrackerPlugin extends Plugin
 		if (animationId == playerMageAttackId)
 		{
 			return client.isPrayerActive(Prayer.AUGURY) ||
+					client.isPrayerActive(Prayer.MYSTIC_VIGOUR) ||
 					client.isPrayerActive(Prayer.MYSTIC_MIGHT) ||
 					client.isPrayerActive(Prayer.MYSTIC_LORE) ||
 					client.isPrayerActive(Prayer.MYSTIC_WILL);
@@ -447,6 +450,7 @@ public class GauntletPerformanceTrackerPlugin extends Plugin
 		if (animationId == playerRangeAttackId)
 		{
 			return client.isPrayerActive(Prayer.RIGOUR) ||
+					client.isPrayerActive(Prayer.DEADEYE) ||
 					client.isPrayerActive(Prayer.EAGLE_EYE) ||
 					client.isPrayerActive(Prayer.HAWK_EYE) ||
 					client.isPrayerActive(Prayer.SHARP_EYE);
